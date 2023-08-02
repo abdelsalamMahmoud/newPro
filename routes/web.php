@@ -54,3 +54,33 @@ Route::get('/home', 'HomeController@index')->name('home')->middleware('verified'
 Route::get('/dashboard', function () {
     return 'dashboard';
 });
+
+Route::get('/fillable','CrudController@getOffers');
+
+Route::group([
+    'prefix' => LaravelLocalization::setLocale(),
+    'middleware' => [ 'localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
+], function() {
+    Route::group(['prefix'=>'offers'], function (){
+        Route::post('store','CrudController@store')->name('offers.store');
+        Route::get('create', 'CrudController@create');
+        Route::get('all', 'CrudController@getAllOffers')->name('offers.all');
+        Route::post('update/{offer_id}','CrudController@updateOffer')->name('offers.update');
+        Route::get('delete/{offer_id}','CrudController@delete')->name('offers.delete');
+        Route::get('edit/{offer_id}', 'CrudController@editOffer');
+    });
+
+    Route::get('/youtube','CrudController@getVideo');
+});
+
+########## begin AJAX routes##########
+Route::group(['prefix'=>'ajax-offers'], function (){
+    Route::get('create', 'OfferController@create');
+    Route::post('store','OfferController@store')->name('ajax.offers.store');
+});
+########## end AJAX routes##########
+
+
+
+
+
