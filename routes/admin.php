@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/admin', function () {
-    return "admin panel";
-});
+//Route::get('/admin', function () {
+//    return "admin panel";
+//});
 
 
 

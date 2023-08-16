@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+define('PAGINATION_COUNT',1);
 Route::get('/', function () {
     return view('welcome');
 });
@@ -52,8 +52,8 @@ Auth::routes(['verify'=>true]);
 Route::get('/home', 'HomeController@index')->name('home')->middleware('verified');
 
 Route::get('/dashboard', function () {
-    return 'dashboard';
-});
+    return 'not authenticated';
+})->name('dash');
 
 Route::get('/fillable','CrudController@getOffers');
 
@@ -77,8 +77,63 @@ Route::group([
 Route::group(['prefix'=>'ajax-offers'], function (){
     Route::get('create', 'OfferController@create');
     Route::post('store','OfferController@store')->name('ajax.offers.store');
+    Route::get('all', 'OfferController@all')->name('ajax.offers.all');
+    Route::post('delete','OfferController@delete')->name('ajax.offers.delete');
+    Route::get('edit/{id}', 'OfferController@edit')->name('ajax.offer.edit');
+    Route::post('update','OfferController@update')->name('ajax.offers.update');
 });
 ########## end AJAX routes##########
+
+########## begin authentication and guards  ##########
+Route::group(['middleware'=>'CheckAge','namespace'=>'Auth'],function (){
+    Route::get('adult','CustomAuthController@adult')->name('adult');
+});
+
+Route::get('site','Auth\CustomAuthController@site')->middleware('auth:web')->name('site');
+Route::get('admin','Auth\CustomAuthController@admin')->middleware('auth:admin')->name('admin');
+Route::get('admin/login','Auth\CustomAuthController@adminLogin')->name('admin.login');
+Route::post('admin/login','Auth\CustomAuthController@checkAdminLogin')->name('save.admin.login');
+
+########## end authentication and guards  ##########
+
+
+############### begin relations routes ###############
+
+#************** begin one to one **************#
+Route::get('has-one','Relations\RelationsController@hasOne');
+Route::get('has-one-reverse','Relations\RelationsController@hasOneReverse');
+Route::get('get-user-has-phone','Relations\RelationsController@getUserHasPhone');
+Route::get('get-user-not-has-phone','Relations\RelationsController@getUserNotHasPhone');
+Route::get('get-user-has-phone-and-specific-code','Relations\RelationsController@getUserHasPhoneAndSpecificCode');
+#************** end one to one **************#
+
+#************** begin one to many **************#
+Route::get('hospital-has-many','Relations\RelationsController@getDoctorsOfHospital');
+Route::get('get-all-hospitals', 'Relations\RelationsController@getAllHospitals');
+Route::get('delete-hospital\{hospital_id}', 'Relations\RelationsController@deleteHospital')->name('delete.hospital');
+Route::get('get-all-doctors\{hospital_id}', 'Relations\RelationsController@getAllDoctors')->name('doctors.all');
+
+#************** end one to many **************#
+
+#************** begin many to many **************#
+Route::get('doctors-services','Relations\RelationsController@getDoctorsServices');
+Route::get('doctor-services\{doctor_id}', 'Relations\RelationsController@getDoctorServicesByID')->name('doctors.services');
+Route::post('saveServices-to-doctor', 'Relations\RelationsController@saveServicesToDoctor')->name('save.doctors.services');
+#************** end many to many **************#
+
+#************** begin has one through **************#
+Route::get('has-one-through', 'Relations\RelationsController@getPatientDoctor');
+#************** end has one through **************#
+
+#************** begin has many through **************#
+Route::get('has-many-through', 'Relations\RelationsController@getCounrtyDoctors');
+#************** end has many through **************#
+
+############### end relations routes ###############
+
+##############task###########################
+Route::get('get-all-hospitals', 'Relations\RelationsController@getAllHopitals');
+#############end task#######################
 
 
 

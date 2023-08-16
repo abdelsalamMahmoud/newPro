@@ -73,6 +73,10 @@
             width: 40%;
             margin: auto;
         }
+        .image{
+            width: 70px;
+            height: 70px;
+        }
     </style>
 </head>
 <body>

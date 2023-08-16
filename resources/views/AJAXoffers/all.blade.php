@@ -1,52 +1,9 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.app')
 
-        <title>Laravel</title>
-
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;600&display=swap" rel="stylesheet">
-
-        <!-- Styles -->
-        <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-        <style>
-            .image{
-                width: 70px;
-                height: 70px;
-            }
-        </style>
-    </head>
-    <body>
-
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Navbar</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-                    @foreach(LaravelLocalization::getSupportedLocales() as $localeCode => $properties)
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{ LaravelLocalization::getLocalizedURL($localeCode, null, [], true) }}">{{ $properties['native'] }}</a>
-                    </li>
-                    @endforeach
-                </ul>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="{{__('massage.search')}}" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">{{__('massage.search')}}</button>
-                </form>
-            </div>
+@section('content')
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" style="display: none" id="DeleteS">
+            <strong>offer deleted successfully</strong>
         </div>
-    </nav>
-    @if(\Illuminate\Support\Facades\Session::has('deleted'))
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <strong>{{\Illuminate\Support\Facades\Session::get('deleted')}}</strong>
-        </div>
-    @endif
     <table class="table">
         <thead>
         <tr>
@@ -60,7 +17,7 @@
         </thead>
         <tbody>
         @foreach($offers as $offer)
-            <tr>
+            <tr class="offerRow{{$offer['id']}}">
                 <th scope="row">{{$offer['id']}}</th>
                 <td>{{$offer['name']}}</td>
                 <td>{{$offer['price']}}</td>
@@ -69,10 +26,37 @@
                 <td>
                     <a href="{{url('offers/edit/'.$offer['id'])}}" class="btn btn-success">{{__('massage.update')}}</a>
                     <a href="{{route('offers.delete',$offer['id'])}}" class="btn btn-danger">{{__('massage.delete')}}</a>
+                    <a href="" offer_id="{{$offer['id']}}" class="deleteAjax btn btn-danger">delete Ajax</a>
+                    <a href="{{route('ajax.offer.edit',$offer['id'])}}" class="btn btn-danger">edit Ajax</a>
                 </td>
             </tr>
         @endforeach
         </tbody>
     </table>
-    </body>
-</html>
+@stop
+
+@section('scripts')
+    <script>
+        $(document).on('click','.deleteAjax',function (e){
+            e.preventDefault();
+            var offer_id = $(this).attr('offer_id');
+            $.ajax({
+                type :'POST',
+                url :"{{ route('ajax.offers.delete') }}",
+                data :{
+                    '_token':"{{csrf_token()}}",
+                    'id':offer_id,
+                },
+                success : function (data){
+                    if(data.status == true){
+                        $('#DeleteS').show();
+                    }
+                    $('.offerRow'+data.id).remove();
+
+                }, error: function (reject){
+                }
+            });
+        });
+
+    </script>
+@stop
